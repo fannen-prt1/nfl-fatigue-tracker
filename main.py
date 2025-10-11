@@ -100,6 +100,14 @@ def clear_all_players():
         except:
             pass  # Continue even if directory removal fails
         
+        # Try to remove the entire matches history directory
+        try:
+            if os.path.exists("matches_history"):
+                import shutil
+                shutil.rmtree("matches_history")
+        except:
+            pass  # Continue even if directory removal fails
+        
         return True
     except Exception as e:
         st.error(f"Error clearing all players: {e}")
@@ -114,23 +122,23 @@ def main():
     )
     
     # Sidebar navigation
-    st.sidebar.title("NFL Fatigue Tracker")
+    st.sidebar.title("🏈 NFL Fatigue Tracker")
     page = st.sidebar.selectbox(
-        "Navigate to:",
-        ["Main Dashboard", "Players", "Matches"]
+        "🧭 Navigate to:",
+        ["🏠 Main Dashboard", "👥 Players", "🏟️ Matches"]
     )
     
     # Page routing
-    if page == "Main Dashboard":
+    if page == "🏠 Main Dashboard":
         show_main_dashboard()
-    elif page == "Players":
+    elif page == "👥 Players":
         show_players_page()
-    elif page == "Matches":
+    elif page == "🏟️ Matches":
         show_matches_page()
 
 def show_main_dashboard():
     """Display the main dashboard page."""
-    st.title("NFL Player Fatigue Tracking Platform")
+    st.title("🏈 NFL Player Fatigue Tracking Platform ⚡")
     st.markdown("---")
     
     # Initialize session state for players data
@@ -138,11 +146,15 @@ def show_main_dashboard():
         st.session_state.players_data = load_players_data()
     
     # Sidebar sections
-    st.sidebar.header("Add New Player")
-    with st.sidebar.expander("Add Player", expanded=False):
+    st.sidebar.header("➕ Add New Player")
+    with st.sidebar.expander("👤 Add Player", expanded=False):
         add_new_player_form()
     
-    st.sidebar.header("Manual Metric Entry")
+    st.sidebar.header("🎲 Generate Random Players")
+    with st.sidebar.expander("🎯 Generate Players", expanded=False):
+        generate_random_players_form()
+    
+    st.sidebar.header("📊 Manual Metric Entry")
     selected_player = st.sidebar.selectbox(
         "Select Player:",
         options=[f"{p['name']} (#{p['number']})" for p in st.session_state.players_data]
@@ -154,11 +166,11 @@ def show_main_dashboard():
         
         st.sidebar.subheader(f"Update {selected_player}")
         new_bpm = st.sidebar.number_input("Average BPM", 
-                                        value=st.session_state.players_data[player_index]['avg_bpm'],
-                                        min_value=40, max_value=200)
+                                        value=float(st.session_state.players_data[player_index]['avg_bpm']),
+                                        min_value=40.0, max_value=200.0, step=0.1)
         new_rr_ms = st.sidebar.number_input("RR_MS", 
-                                          value=st.session_state.players_data[player_index]['rr_ms'],
-                                          min_value=200, max_value=2000)
+                                          value=float(st.session_state.players_data[player_index]['rr_ms']),
+                                          min_value=200.0, max_value=2000.0, step=1.0)
         new_speed = st.sidebar.number_input("Avg Speed (yards/sec)", 
                                           value=st.session_state.players_data[player_index]['avg_speed'],
                                           min_value=0.0, max_value=15.0, step=0.1)
@@ -169,7 +181,7 @@ def show_main_dashboard():
                                         options=["active", "benched", "practice squad", "injured"],
                                         index=["active", "benched", "practice squad", "injured"].index(st.session_state.players_data[player_index].get('status', 'active')))
         
-        if st.sidebar.button("Update Metrics"):
+        if st.sidebar.button("📊 Update Metrics"):
             st.session_state.players_data[player_index]['avg_bpm'] = new_bpm
             st.session_state.players_data[player_index]['rr_ms'] = new_rr_ms
             st.session_state.players_data[player_index]['avg_speed'] = new_speed
@@ -180,13 +192,13 @@ def show_main_dashboard():
                 new_bpm, new_rr_ms, new_speed, new_acceleration
             )
             save_players_data(st.session_state.players_data)  # Save to file
-            st.sidebar.success("Metrics updated!")
+            st.sidebar.success("✅ Metrics updated!")
             st.rerun()
     
     # Photo update section
-    st.sidebar.header("Update Player Photo")
+    st.sidebar.header("📸 Update Player Photo")
     photo_player = st.sidebar.selectbox(
-        "Select Player for Photo Update:",
+        "📋 Select Player for Photo Update:",
         options=[f"{p['name']} (#{p['number']})" for p in st.session_state.players_data],
         key="photo_player_select"
     )
@@ -203,7 +215,6 @@ def show_main_dashboard():
         
         if uploaded_file is not None:
             # Save the uploaded file
-            import os
             photos_dir = "player_photos"
             if not os.path.exists(photos_dir):
                 os.makedirs(photos_dir)
@@ -219,10 +230,10 @@ def show_main_dashboard():
             st.rerun()
     
     # Player removal section
-    st.sidebar.header("Remove Player")
+    st.sidebar.header("🗑️ Remove Player")
     if len(st.session_state.players_data) > 0:
         remove_player = st.sidebar.selectbox(
-            "Select Player to Remove:",
+            "⚠️ Select Player to Remove:",
             options=[f"{p['name']} (#{p['number']})" for p in st.session_state.players_data],
             key="remove_player_select"
         )
@@ -253,42 +264,51 @@ def show_main_dashboard():
                         except:
                             pass  # If file deletion fails, continue anyway
                     
-                    # Remove player from data
+                    # Remove player matches history file if it exists
                     removed_player_name = st.session_state.players_data[remove_player_index]['name']
+                    safe_player_name = removed_player_name.replace(" ", "_").replace("/", "_").replace("\\", "_")
+                    matches_file = f"matches_history/{safe_player_name}_matches.json"
+                    if os.path.exists(matches_file):
+                        try:
+                            os.remove(matches_file)
+                        except:
+                            pass  # If file deletion fails, continue anyway
+                    
+                    # Remove player from data
                     st.session_state.players_data.pop(remove_player_index)
                     save_players_data(st.session_state.players_data)  # Save to file
-                    st.sidebar.success(f"Player {removed_player_name} removed successfully!")
+                    st.sidebar.success(f"✅ Player {removed_player_name} removed successfully!")
                     st.rerun()
                 else:
-                    st.sidebar.error("Please confirm the removal by checking the checkbox above.")
+                    st.sidebar.error("❌ Please confirm the removal by checking the checkbox above.")
     else:
         st.sidebar.info("No players available to remove.")
     
     # Clear all photos section
-    st.sidebar.header("Clear All Photos")
-    if st.sidebar.button("Clear All Player Photos", type="secondary"):
+    st.sidebar.header("🗂️ Clear All Photos")
+    if st.sidebar.button("🖼️ Clear All Player Photos", type="secondary"):
         if clear_all_photos():
-            st.sidebar.success("All player photos cleared successfully!")
+            st.sidebar.success("✅ All player photos cleared successfully!")
             st.rerun()
         else:
-            st.sidebar.error("Error clearing photos.")
+            st.sidebar.error("❌ Error clearing photos.")
     
     # Clear all players section
-    st.sidebar.header("Clear All Players")
-    st.sidebar.warning("This will remove ALL players and their data!")
-    confirm_clear_all = st.sidebar.checkbox("I confirm I want to clear ALL players", key="confirm_clear_all")
-    if st.sidebar.button("Clear All Players", type="secondary"):
+    st.sidebar.header("🚨 Clear All Players")
+    st.sidebar.warning("⚠️ This will remove ALL players and their data!")
+    confirm_clear_all = st.sidebar.checkbox("☑️ I confirm I want to clear ALL players", key="confirm_clear_all")
+    if st.sidebar.button("🗑️ Clear All Players", type="secondary"):
         if confirm_clear_all:
             if clear_all_players():
-                st.sidebar.success("All players cleared successfully!")
+                st.sidebar.success("✅ All players cleared successfully!")
                 st.rerun()
             else:
-                st.sidebar.error("Error clearing players.")
+                st.sidebar.error("❌ Error clearing players.")
         else:
-            st.sidebar.error("Please confirm by checking the checkbox above.")
+            st.sidebar.error("⚠️ Please confirm by checking the checkbox above.")
     
     # Main dashboard content
-    st.header("Player Fatigue Dashboard")
+    st.header("🏆 Player Fatigue Dashboard")
     st.write("Real-time monitoring of NFL player fatigue levels and performance metrics.")
     
     # Display players in grid (4 per row)
@@ -301,41 +321,41 @@ def add_new_player_form():
         
         col1, col2 = st.columns(2)
         with col1:
-            new_name = st.text_input("Player Name*", placeholder="e.g., Tom Brady")
-            new_number = st.number_input("Jersey Number*", min_value=1, max_value=99, value=1)
+            new_name = st.text_input("👤 Player Name*", placeholder="e.g., Tom Brady")
+            new_number = st.number_input("🔢 Jersey Number*", min_value=1, max_value=99, value=1)
         
         with col2:
-            new_position = st.selectbox("Position*", 
+            new_position = st.selectbox("🏈 Position*", 
                                       ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K", "P"])
-            new_team = st.text_input("Team*", placeholder="e.g., Tampa Bay Buccaneers")
+            new_team = st.text_input("🏟️ Team*", placeholder="e.g., Tampa Bay Buccaneers")
         
-        st.subheader("Player Status")
-        new_status = st.selectbox("Status*", ["active", "benched", "practice squad", "injured"])
+        st.subheader("📊 Player Status")
+        new_status = st.selectbox("⚡ Status*", ["active", "benched", "practice squad", "injured"])
         
-        st.subheader("Performance Metrics")
+        st.subheader("📈 Performance Metrics")
         col3, col4 = st.columns(2)
         with col3:
-            new_bpm = st.number_input("Average BPM", min_value=40, max_value=200, value=75)
-            new_rr_ms = st.number_input("RR_MS", min_value=200, max_value=2000, value=800)
+            new_bpm = st.number_input("❤️ Average BPM", min_value=40.0, max_value=200.0, value=75.0, step=0.1)
+            new_rr_ms = st.number_input("💓 RR_MS", min_value=200.0, max_value=2000.0, value=800.0, step=1.0)
         
         with col4:
-            new_speed = st.number_input("Avg Speed (yards/sec)", min_value=0.0, max_value=15.0, 
+            new_speed = st.number_input("🏃 Avg Speed (yards/sec)", min_value=0.0, max_value=15.0, 
                                       value=5.0, step=0.1)
-            new_acceleration = st.number_input("Acceleration (yards/sec²)", min_value=0.0, 
+            new_acceleration = st.number_input("⚡ Acceleration (yards/sec²)", min_value=0.0, 
                                              max_value=10.0, value=3.5, step=0.1)
         
         # Photo upload
-        st.subheader("Player Photo (Optional)")
-        uploaded_photo = st.file_uploader("Upload player photo", type=['png', 'jpg', 'jpeg'])
+        st.subheader("📸 Player Photo (Optional)")
+        uploaded_photo = st.file_uploader("🖼️ Upload player photo", type=['png', 'jpg', 'jpeg'])
         
-        submitted = st.form_submit_button("Add Player")
+        submitted = st.form_submit_button("➕ Add Player")
         
         if submitted:
             if new_name and new_team:
                 # Check if player number already exists
                 existing_numbers = [p['number'] for p in st.session_state.players_data]
                 if new_number in existing_numbers:
-                    st.error(f"Jersey number {new_number} is already taken!")
+                    st.error(f"❌ Jersey number {new_number} is already taken!")
                     return
                 
                 # Create new player
@@ -359,7 +379,6 @@ def add_new_player_form():
                 
                 # Handle photo upload
                 if uploaded_photo is not None:
-                    import os
                     photos_dir = "player_photos"
                     if not os.path.exists(photos_dir):
                         os.makedirs(photos_dir)
@@ -372,10 +391,184 @@ def add_new_player_form():
                 # Add to players data
                 st.session_state.players_data.append(new_player)
                 save_players_data(st.session_state.players_data)  # Save to file
-                st.success(f"Player {new_name} added successfully!")
+                st.success(f"✅ Player {new_name} added successfully!")
                 st.rerun()
             else:
-                st.error("Please fill in all required fields (marked with *)")
+                st.error("❌ Please fill in all required fields (marked with *)")
+
+def generate_random_players_form():
+    """Display form to generate random players."""
+    import random
+    
+    with st.form("generate_random_players_form"):
+        st.subheader("🎲 Generate Random Players")
+        
+        # Configuration options
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            num_players = st.number_input("👥 Number of Players", min_value=1, max_value=50, value=5)
+            team_name = st.text_input("🏆 Team Name", placeholder="e.g., Random Eagles", value="Random Team")
+        
+        with col2:
+            position_distribution = st.selectbox(
+                "⚽ Position Distribution",
+                ["Balanced NFL Roster", "Defensive Focus", "Offensive Focus", "Random Mix"]
+            )
+        
+        # Player quality settings
+        st.subheader("⭐ Player Quality Settings")
+        quality_level = st.selectbox(
+            "💪 Overall Team Quality",
+            ["Elite Team", "Good Team", "Average Team", "Mixed Quality", "Random"]
+        )
+        
+        submitted = st.form_submit_button("🎲 Generate Random Players")
+        
+        if submitted:
+            # Generate random players
+            new_players = create_random_players(num_players, team_name, position_distribution, quality_level)
+            
+            # Check for jersey number conflicts
+            existing_numbers = [p['number'] for p in st.session_state.players_data]
+            
+            players_added = 0
+            for player in new_players:
+                # Find available jersey number
+                original_number = player['number']
+                attempts = 0
+                while player['number'] in existing_numbers and attempts < 99:
+                    player['number'] = random.randint(1, 99)
+                    attempts += 1
+                
+                if player['number'] not in existing_numbers:
+                    st.session_state.players_data.append(player)
+                    existing_numbers.append(player['number'])
+                    players_added += 1
+            
+            # Save and update
+            if players_added > 0:
+                save_players_data(st.session_state.players_data)
+                st.success(f"✅ Generated and added {players_added} random players!")
+                st.rerun()
+            else:
+                st.error("❌ Could not add players - too many jersey number conflicts!")
+
+def create_random_players(num_players, team_name, position_distribution, quality_level):
+    """Create a list of random players with realistic stats."""
+    import random
+    
+    # NFL Positions with realistic distributions
+    if position_distribution == "Balanced NFL Roster":
+        positions = (["QB"] * 2 + ["RB"] * 3 + ["WR"] * 5 + ["TE"] * 2 + ["OL"] * 8 +
+                    ["DL"] * 6 + ["LB"] * 6 + ["CB"] * 4 + ["S"] * 3 + ["K", "P"])
+    elif position_distribution == "Defensive Focus":
+        positions = ["DL"] * 8 + ["LB"] * 8 + ["CB"] * 6 + ["S"] * 4 + ["QB", "RB", "WR"]
+    elif position_distribution == "Offensive Focus":
+        positions = ["QB"] * 3 + ["RB"] * 5 + ["WR"] * 8 + ["TE"] * 3 + ["OL"] * 6
+    else:  # Random Mix
+        all_positions = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K", "P"]
+        positions = [random.choice(all_positions) for _ in range(num_players)]
+    
+    # Realistic NFL player names
+    first_names = [
+        "Aaron", "Adrian", "Antonio", "Brandon", "Calvin", "Dak", "Deion", "Derek", "Deshaun",
+        "Ezekiel", "Frank", "George", "Jarvis", "Josh", "Julian", "Julio", "Lamar", "Mac",
+        "Michael", "Mike", "Nick", "Odell", "Patrick", "Rob", "Russell", "Stefon", "Tom",
+        "Travis", "Tyreek", "Von", "Zach", "DeAndre", "Khalil", "Alvin", "Chris", "Cooper",
+        "Davante", "DeVonta", "Jalen", "Justin", "Kyler", "Najee", "Saquon", "Tua"
+    ]
+    
+    last_names = [
+        "Adams", "Allen", "Brady", "Brown", "Cook", "Cooper", "Davis", "Evans", "Green",
+        "Hill", "Hopkins", "Jackson", "Johnson", "Jones", "Kelce", "Lewis", "Mack", "Miller",
+        "Murray", "Newton", "Robinson", "Rogers", "Smith", "Taylor", "Thomas", "Watson",
+        "White", "Williams", "Wilson", "Young", "Beckham", "Bell", "Bosa", "Donald", "Elliott",
+        "Garrett", "Gronkowski", "Henry", "Kamara", "Mahomes", "McCaffrey", "Ramsey", "Watt"
+    ]
+    
+    # Quality-based stat ranges
+    if quality_level == "Elite Team":
+        bpm_range = (65, 85)
+        rr_range = (700, 900)
+        speed_range = (6.0, 9.0)
+        accel_range = (4.0, 6.5)
+    elif quality_level == "Good Team":
+        bpm_range = (70, 90)
+        rr_range = (650, 950)
+        speed_range = (5.0, 7.5)
+        accel_range = (3.5, 5.5)
+    elif quality_level == "Average Team":
+        bpm_range = (75, 95)
+        rr_range = (600, 1000)
+        speed_range = (4.0, 6.5)
+        accel_range = (3.0, 5.0)
+    elif quality_level == "Mixed Quality":
+        bpm_range = (65, 100)
+        rr_range = (550, 1100)
+        speed_range = (3.5, 8.0)
+        accel_range = (2.5, 6.0)
+    else:  # Random
+        bpm_range = (60, 110)
+        rr_range = (500, 1200)
+        speed_range = (2.0, 10.0)
+        accel_range = (2.0, 7.0)
+    
+    players = []
+    used_numbers = set()
+    
+    for i in range(min(num_players, len(positions))):
+        # Generate unique jersey number
+        jersey_num = random.randint(1, 99)
+        while jersey_num in used_numbers:
+            jersey_num = random.randint(1, 99)
+        used_numbers.add(jersey_num)
+        
+        # Generate realistic stats based on position
+        position = positions[i]
+        
+        # Position-specific stat adjustments
+        if position in ["RB", "WR", "CB"]:  # Speed positions
+            speed_multiplier = 1.2
+            bpm_adjustment = -5
+        elif position in ["OL", "DL"]:  # Power positions
+            speed_multiplier = 0.8
+            bpm_adjustment = 5
+        elif position == "QB":  # Quarterbacks
+            speed_multiplier = 0.9
+            bpm_adjustment = -2
+        else:  # Default
+            speed_multiplier = 1.0
+            bpm_adjustment = 0
+        
+        # Generate stats
+        bpm = max(50, min(120, random.uniform(*bpm_range) + bpm_adjustment))
+        rr_ms = random.uniform(*rr_range)
+        speed = max(1.0, min(12.0, random.uniform(*speed_range) * speed_multiplier))
+        acceleration = max(1.0, min(8.0, random.uniform(*accel_range) * speed_multiplier))
+        
+        # Create player
+        player = {
+            "name": f"{random.choice(first_names)} {random.choice(last_names)}",
+            "number": jersey_num,
+            "position": position,
+            "team": team_name,
+            "avg_bpm": round(bpm, 1),
+            "rr_ms": round(rr_ms, 1),
+            "avg_speed": round(speed, 2),
+            "acceleration": round(acceleration, 2),
+            "status": random.choice(["active"] * 8 + ["benched"] * 1 + ["practice squad"] * 1),  # 80% active
+            "photo_path": None
+        }
+        
+        # Calculate fatigue prediction
+        player['fatigue_prediction'] = calculate_fatigue_prediction(
+            player['avg_bpm'], player['rr_ms'], player['avg_speed'], player['acceleration']
+        )
+        
+        players.append(player)
+    
+    return players
 
 def initialize_sample_players():
     """Initialize sample player data."""
@@ -405,9 +598,9 @@ def calculate_fatigue_prediction(bpm, rr_ms, speed, acceleration):
 
 def get_fatigue_color(fatigue_level):
     """Get color indicator based on fatigue level."""
-    if fatigue_level < 30:
+    if fatigue_level < 60:
         return "[LOW]"  # Low fatigue
-    elif fatigue_level < 60:
+    elif fatigue_level < 80:
         return "[MEDIUM]"  # Medium fatigue
     else:
         return "[HIGH]"  # High fatigue
@@ -548,7 +741,7 @@ def generate_player_suggestions(bpm, rr_ms, speed, acceleration, fatigue_level):
         suggestions.append("Consider strength and conditioning focus")
     
     # Overall fatigue level suggestions
-    if fatigue_level >= 80:
+    if fatigue_level > 80:
         suggestions.append("CRITICAL: Complete rest recommended")
         suggestions.append("Consider medical evaluation if symptoms persist")
         suggestions.append("Implement continuous monitoring protocol")
@@ -606,13 +799,13 @@ def display_players_grid(players_data):
                         # Player photo (use uploaded photo if available, otherwise placeholder)
                         if player.get('photo_path') and os.path.exists(player['photo_path']):
                             try:
-                                st.image(player['photo_path'], width=150, use_container_width=False)
+                                st.image(player['photo_path'], width=150)
                             except:
                                 st.image("https://via.placeholder.com/150x150/cccccc/ffffff?text=Player", 
-                                        width=150, use_container_width=False)
+                                        width=150)
                         else:
                             st.image("https://via.placeholder.com/150x150/cccccc/ffffff?text=Player", 
-                                    width=150, use_container_width=False)
+                                    width=150)
                         
                         # Player number and position (below photo)
                         st.markdown(f"**#{player['number']} - {player['position']}**")
