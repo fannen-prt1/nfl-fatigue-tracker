@@ -1,35 +1,54 @@
 # NFL Player Fatigue Tracking Platform
 
-A comprehensive web-based platform for monitoring and analyzing NFL player fatigue levels using real-time physiological metrics and performance data.
+A full-stack web application for monitoring and analyzing NFL player fatigue levels using physiological metrics and match performance data. Built with a **React** frontend and **FastAPI** backend.
 
 ## Features
 
-### Core Functionality
-- **Player Management**: Add, update, and remove NFL players with complete profiles
-- **Fatigue Analysis**: Real-time fatigue prediction based on multiple physiological metrics
-- **Status Tracking**: Monitor player status (Active, Benched, Practice Squad, Injured)
-- **Photo Management**: Upload and manage player photos
-- **Data Persistence**: All data is automatically saved and persists across sessions
+### Dashboard
+- Team-level stat cards (total players, avg fatigue, active count, at-risk players)
+- Fatigue trend chart from match overview data
+- High fatigue alert panel
+- Fatigue & status distribution pie charts
+- Team metrics bar chart
+- AI-generated team report with risk level and recommendations
 
-### Analytics & Insights
-- **Multi-Metric Analysis**: Heart rate (BPM), heart rate variability (RR_MS), movement speed, and acceleration
-- **Intelligent Fatigue Prediction**: Advanced algorithm analyzing all metrics for accurate fatigue assessment
-- **Detailed Reasoning**: Comprehensive explanations for why fatigue levels are elevated or low
-- **Personalized Recommendations**: AI-generated suggestions for training, recovery, and player management
+### Player Management
+- Full roster table with search, filter (status/position), and sort
+- Add individual players with complete metrics
+- Generate random players (balanced/defensive/offensive/random, quality levels)
+- Export roster to CSV
+- Inline delete and bulk clear
 
-### User Interface
-- **Interactive Dashboard**: Clean, professional interface with player cards in grid layout
-- **Status-Based Sorting**: Players automatically organized by status priority
-- **Expandable Recommendations**: Detailed suggestions available for each player
-- **Real-time Updates**: Instant feedback and automatic data saving
+### Player Detail
+- Player profile with photo upload
+- Real-time fatigue ring indicator
+- Metric cards (BPM, HRV, Speed, Acceleration)
+- Fatigue analysis breakdown (high/moderate/good stress factors)
+- Personalized recovery & training recommendations
+- Match history management (add/edit/delete matches)
+- Performance charts: heart rate & HRV, fatigue, speed, acceleration over matches
+
+### Matches & Analysis
+- **Match Overview**: aggregate stats, fatigue timeline, all match records table
+- **Lineup Optimizer**: fatigue threshold slider, position-grouped lineup (DL, LB, DB, QB, RB, WR, TE, OL), excluded high-fatigue players list
+- **Performance Trends**: multi-metric trend chart, performance correlations, AI insights
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, Vite 7, React Router 7, Recharts, Framer Motion, Lucide Icons |
+| Backend | FastAPI, Uvicorn, Python 3.10+ |
+| Data | JSON file persistence (`players_data.json`, `matches_history/`) |
 
 ## Installation
 
 ### Prerequisites
-- Python 3.7 or higher
-- pip (Python package installer)
+- Python 3.10+
+- Node.js 18+
+- npm or yarn
 
-### Setup Instructions
+### Setup
 
 1. **Clone the repository**
    ```bash
@@ -37,157 +56,126 @@ A comprehensive web-based platform for monitoring and analyzing NFL player fatig
    cd nfl-fatigue-tracker
    ```
 
-2. **Create a virtual environment**
+2. **Backend setup**
    ```bash
    python -m venv venv
-   ```
+   # Windows PowerShell
+   .\venv\Scripts\Activate.ps1
+   # macOS/Linux
+   source venv/bin/activate
 
-3. **Activate the virtual environment**
-   - **Windows (PowerShell):**
-     ```powershell
-     .\venv\Scripts\Activate.ps1
-     ```
-   - **Windows (Command Prompt):**
-     ```cmd
-     venv\Scripts\activate
-     ```
-   - **macOS/Linux:**
-     ```bash
-     source venv/bin/activate
-     ```
-
-4. **Install dependencies**
-   ```bash
    pip install -r requirements.txt
    ```
 
-## Dependencies
-
-The following Python packages are required:
-
-```
-streamlit>=1.28.0
-pandas>=2.0.0
-pillow>=10.0.0
-numpy>=1.24.0
-```
+3. **Frontend setup**
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
 
 ## Usage
 
-1. **Start the application**
+1. **Start the API server** (from project root, with venv activated)
    ```bash
-   streamlit run main.py
+   python api.py
    ```
+   The API runs at `http://localhost:8000`.
 
-2. **Access the platform**
-   - Open your web browser and navigate to `http://localhost:8501`
-   - The platform will be accessible at this URL
+2. **Start the React dev server** (in a second terminal)
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+   The UI runs at `http://localhost:5173`.
 
-3. **Platform Navigation**
-   - **Main Dashboard**: View all players with fatigue analysis and recommendations
-   - **Players Page**: Detailed player management (coming soon)
-   - **Matches Page**: Match-based fatigue analysis (coming soon)
+3. **Navigate the app**
+   - **Dashboard** (`/`) — team overview and analytics
+   - **Players** (`/players`) — roster management
+   - **Player Detail** (`/players/:id`) — individual player view
+   - **Matches** (`/matches`) — match analysis & lineup optimizer
 
-## File Structure
+## Project Structure
 
 ```
 nfl-fatigue-tracker/
-├── main.py                 # Main application file
-├── players_page.py         # Players management module
-├── matches_page.py         # Matches analysis module
+├── api.py                  # FastAPI REST backend
 ├── requirements.txt        # Python dependencies
-├── README.md              # Project documentation
-├── players_data.json      # Player data storage (auto-generated)
-├── player_photos/         # Player photo storage (auto-generated)
-└── venv/                  # Virtual environment (created locally)
+├── players_data.json       # Player data store (auto-generated)
+├── player_photos/          # Uploaded photos (auto-generated)
+├── matches_history/        # Per-player match JSON files (auto-generated)
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── index.html
+│   └── src/
+│       ├── main.jsx
+│       ├── index.css
+│       ├── App.jsx             # Router & layout
+│       ├── components/
+│       │   └── Sidebar.jsx
+│       ├── context/
+│       │   └── AppContext.jsx   # Global state (players CRUD)
+│       ├── pages/
+│       │   ├── Dashboard.jsx
+│       │   ├── PlayerList.jsx
+│       │   ├── PlayerDetail.jsx
+│       │   └── Matches.jsx
+│       └── utils/
+│           └── api.js           # API service layer
+├── LICENSE
+└── README.md
 ```
 
-## Key Metrics Explained
+## API Endpoints
 
-### Heart Rate (BPM)
-- **Normal Range**: 60-100 BPM at rest
-- **Training Range**: 100-180+ BPM during activity
-- **Impact**: Higher heart rates indicate increased cardiovascular stress
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players` | List all players |
+| POST | `/api/players` | Add a player |
+| PUT | `/api/players/{id}` | Update a player |
+| DELETE | `/api/players/{id}` | Delete a player |
+| DELETE | `/api/players` | Clear all players |
+| POST | `/api/players/generate` | Generate random players |
+| POST | `/api/players/{id}/photo` | Upload player photo |
+| GET | `/api/players/{id}/matches` | Get player matches |
+| POST | `/api/players/{id}/matches` | Add a match |
+| PUT | `/api/players/{id}/matches/{num}` | Update a match |
+| DELETE | `/api/players/{id}/matches/{num}` | Delete a match |
+| DELETE | `/api/players/{id}/matches` | Clear player matches |
+| GET | `/api/matches` | All match records |
+| GET | `/api/matches/overview` | Match overview stats |
+| GET | `/api/matches/trends` | Performance trends |
+| GET | `/api/lineup/optimize?max_fatigue=80` | Optimize lineup |
+| GET | `/api/team/report` | Team report |
 
-### Heart Rate Variability (RR_MS)
-- **Healthy Range**: 900-1100+ ms
-- **Stress Indicators**: <650 ms indicates high stress/poor recovery
-- **Impact**: Lower variability suggests inadequate recovery
+## Fatigue Algorithm
 
-### Movement Speed (yards/second)
-- **Low Impact**: <3.5 yd/s
-- **Moderate**: 3.5-6.4 yd/s
-- **High Impact**: >6.5 yd/s
-- **Impact**: Higher speeds increase physical demands
-
-### Acceleration (yards/second²)
-- **Low Demand**: <2.0 yd/s²
-- **Moderate**: 2.0-3.9 yd/s²
-- **High Demand**: >4.0 yd/s²
-- **Impact**: Higher acceleration increases injury risk
-
-## Fatigue Analysis Algorithm
-
-The platform uses a sophisticated algorithm that combines all four metrics:
-
-```python
-fatigue_score = (bpm_factor * 0.3) + (rr_factor * 0.3) + (speed_factor * 0.2) + (accel_factor * 0.2)
 ```
+fatigue = ((BPM - 60) / 40) × 0.3
+        + ((1200 - RR_MS) / 400) × 0.3
+        + (Speed / 10) × 0.2
+        + (Acceleration / 6) × 0.2
+```
+Result clamped to 0–100. Weights: BPM 30%, HRV 30%, Speed 20%, Acceleration 20%.
 
-- **BPM Factor**: Normalized heart rate impact (30% weight)
-- **RR Factor**: Inverse heart rate variability impact (30% weight)
-- **Speed Factor**: Movement intensity impact (20% weight)
-- **Acceleration Factor**: Explosive movement impact (20% weight)
+## Key Metrics
 
-## Player Status Categories
-
-- **Active**: Starting players available for games
-- **Benched**: Available but not starting
-- **Practice Squad**: Developmental players
-- **Injured**: Unavailable due to injury
-
-Players are automatically sorted by status priority in the dashboard.
-
-## Data Management
-
-### Automatic Saving
-- All player data is automatically saved to `players_data.json`
-- Photo uploads are stored in the `player_photos/` directory
-- Changes persist across browser refreshes and application restarts
-
-### Data Operations
-- **Add Players**: Complete player profiles with optional photos
-- **Update Metrics**: Real-time metric adjustments with automatic fatigue recalculation
-- **Photo Management**: Upload, update, or clear player photos
-- **Bulk Operations**: Clear all photos or reset entire platform
+| Metric | Unit | Normal | Elevated | High |
+|--------|------|--------|----------|------|
+| Heart Rate | BPM | 60–84 | 85–99 | 100+ |
+| HRV (RR_MS) | ms | 900+ | 750–900 | <750 |
+| Speed | yd/s | <3.5 | 3.5–6.4 | 6.5+ |
+| Acceleration | yd/s² | <2.0 | 2.0–3.9 | 4.0+ |
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'Add my feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
 5. Open a Pull Request
-
-## Future Enhancements
-
-- **Advanced Analytics**: Trend analysis and predictive modeling
-- **Team Comparisons**: Cross-team fatigue analysis
-- **Match Integration**: Game-specific fatigue tracking
-- **API Integration**: Real-time data feeds from wearable devices
-- **Reporting**: PDF report generation for coaching staff
-- **Mobile App**: Companion mobile application
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, questions, or feature requests, please open an issue on GitHub.
-
-## Acknowledgments
-
-- Built with [Streamlit](https://streamlit.io/) for the web interface
-- Physiological metrics based on sports science research
-- Designed for NFL coaching staff and sports scientists
+MIT License — see [LICENSE](LICENSE) for details.
