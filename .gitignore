@@ -110,6 +110,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Copilot/Claude agent artifacts
+.claude/
+
 # Spyder project settings
 .spyderproject
 .spyproject

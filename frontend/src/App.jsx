@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import PlayerList from './pages/PlayerList';
 import PlayerDetail from './pages/PlayerDetail';
 import Matches from './pages/Matches';
+import FatiguePrediction from './pages/FatiguePrediction';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
               <Route path="/players" element={<PlayerList />} />
               <Route path="/players/:id" element={<PlayerDetail />} />
               <Route path="/matches" element={<Matches />} />
+              <Route path="/fatigue-prediction" element={<FatiguePrediction />} />
             </Routes>
           </main>
         </div>

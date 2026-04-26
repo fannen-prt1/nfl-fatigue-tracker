@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Activity, LayoutDashboard, Users, Calendar } from 'lucide-react';
+import { Activity, LayoutDashboard, Users, Calendar, Brain } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/players', label: 'Players', icon: Users },
   { path: '/matches', label: 'Matches', icon: Calendar },
+  { path: '/fatigue-prediction', label: 'Fatigue Predictor', icon: Brain },
 ];
 
 const Sidebar = () => {

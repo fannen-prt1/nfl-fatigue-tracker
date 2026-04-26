@@ -1,0 +1,27 @@
+# Model files
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pb
+
+# Logs
+logs/*.log
+logs/training/
+
+# Cache
+cache/*.json
+cache/*.pkl
+
+# Data exports
+data/exports/
+
+# Processed/derived datasets
+data/processed/
+
+# Temporary files
+*.tmp
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb

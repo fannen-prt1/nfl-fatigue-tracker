@@ -39,7 +39,7 @@ A full-stack web application for monitoring and analyzing NFL player fatigue lev
 |-------|-----------|
 | Frontend | React 19, Vite 7, React Router 7, Recharts, Framer Motion, Lucide Icons |
 | Backend | FastAPI, Uvicorn, Python 3.10+ |
-| Data | JSON file persistence (`players_data.json`, `matches_history/`) |
+| Data | Local JSON file persistence (`players_data.json`, `matches_history/` — generated at runtime and gitignored) |
 
 ## Installation
 
@@ -52,7 +52,7 @@ A full-stack web application for monitoring and analyzing NFL player fatigue lev
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/fannen-prt1/nfl-fatigue-tracker.git
+   git clone <YOUR_GITHUB_REPO_URL>
    cd nfl-fatigue-tracker
    ```
 
@@ -94,6 +94,12 @@ A full-stack web application for monitoring and analyzing NFL player fatigue lev
    - **Players** (`/players`) — roster management
    - **Player Detail** (`/players/:id`) — individual player view
    - **Matches** (`/matches`) — match analysis & lineup optimizer
+
+## Secrets & Credentials
+
+- This project does not require any API keys by default.
+- Do **not** commit secrets (API keys, tokens, private keys). The root `.gitignore` already ignores common files like `.env`, `venv/`, and local runtime data.
+- Avoid embedding tokens in your git remote URL (e.g. `https://<token>@github.com/...`). You can check with `git remote -v`.
 
 ## Project Structure
 
