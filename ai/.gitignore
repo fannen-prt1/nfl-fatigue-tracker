@@ -18,6 +18,9 @@ data/exports/
 # Processed/derived datasets
 data/processed/
 
+# Raw sensor capture streams (keep local by default)
+data/*_stream.json
+
 # Temporary files
 *.tmp
 .DS_Store
